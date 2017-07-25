@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 
-//require('./app/routes')(app);
+require('./app/routes')(app);
 
 var cron = require('node-cron');
 
@@ -26,15 +26,20 @@ app.get('/test', function (req, res) {
   });
 });
 
-app.get('/', function (req, res) {
-      client.cat.indices({}, function(err, resp, status) {
-          var data = {};
-          data = resp.split("\n").join("<br />");
-          res.render('home.ejs', {
-              result: data
-          });
-      });
-  });
+// app.get('/', function (req, res) {
+//       client.cat.indices({
+//         //format: 'json',
+//         v: true
+//       }, function(err, resp, status) {
+//           var data = {};
+//           //console.log(resp);
+//           data = resp.split("\n").join("<br />");
+//           res.render('home.ejs', {
+//               //result: resp
+//               result: data
+//           });
+//       });
+//   });
 // cron.schedule('*/5 * * * * *', function() {
 //   // client.cluster.health({}, function(err, resp, status) {
 //   //   app.get('/', function(req, res) {

@@ -1,6 +1,6 @@
 <!doctype html>
 <html>
-    <meta http-equiv="refresh" content="3" />
+        <meta http-equiv="refresh" content="3" />    
     <head>
         <title>elasticsearch status</title>
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
@@ -8,27 +8,254 @@
         <style>
             body { padding-top:80px; word-wrap:break-word; }
         </style>
+        <style>
+            #customers {
+                font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+                border-collapse: collapse;
+                width: 100%;
+            }
+
+            #customers td, #customers th {
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+
+            #customers tr:nth-child(even){background-color: #f2f2f2;}
+
+            #customers tr:hover {background-color: #ddd;}
+
+            #customers th {
+                padding-top: 12px;
+                padding-bottom: 12px;
+                text-align: left;
+                opacity: .8; 
+                background-color: #4CAF50;
+                color: white;
+            }
+
+            .custom {
+                /* font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+                border-collapse: collapse;
+                width: 100%;
+                border: 1px solid #ddd;
+                padding: 8px;
+                padding-top: 12px;
+                padding-bottom: 12px;
+                text-align: left; */
+                opacity: 1; 
+                color: #fff;
+                /* background-color: #66CDAA ; */
+                background-color: #C0C0C0;
+            }
+        </style>
     </head>
     <body>
+        <%
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+
+            var yyyy = today.getFullYear();
+            if(dd < 10) {
+                dd='0' + dd;
+            } 
+            if(mm < 10) {
+                mm='0' + mm;
+            } 
+            var today = yyyy + mm + dd;
+        %>
+
         <div class="container">
 
             <div class="page-header text-center">
-                <h1><span class="fa fa-anchor"></span> Profile Page</h1>
+                <h1><span class="fa fa-anchor"></span>DataStore Status</h1>
                 <a href="/logout" class="btn btn-default btn-sm">Logout</a>
             </div>
 
             <div class="row">
-                <!-- LOCAL INFORMATION -->
+                <!-- INDICES INFORMATION -->
                 <div class="col-sm-8">
                     <div class="well">
-                        <h3><span class="fa fa-user"></span> Local</h3>
-                            <p style="line-height:200%">
-                                <%- result %><br>
-                            </p>
+                        <h3><span class="fa fa-user"></span> Indices Status</h3>
+                            <table id="customers">
+                                <tr>
+                                    <td>health</td>
+                                    <td>status</td>
+                                    <td>index</td>
+                                    <td>pri</td>
+                                    <td>rep</td>
+                                    <td>docs.count</td>
+                                    <td>pri.store.size</td>
+                                </tr>
+                            <% for(var i=0; i < idx_status.length; i++) { %>
+                                <!-- if index is healthy -->
+                                <% if(idx_status[i].health === 'green') { 
+                                    if(idx_status[i].index.indexOf(today) !== -1) { %>
+                                <tr>
+                                    <th><%= idx_status[i].health %></th>
+                                    <td class="custom"><%= idx_status[i].status %></td>
+                                    <td class="custom"><%= idx_status[i].index %></td>
+                                    <td class="custom"><%= idx_status[i].pri %></td>
+                                    <td class="custom"><%= idx_status[i].rep %></td>
+                                    <td class="custom"><%= idx_status[i]["docs.count"] %></td>
+                                    <td class="custom"><%= idx_status[i]["pri.store.size"] %></td>
+                                </tr>
+                                <% } else { %>
+                                <tr>
+                                    <th><%= idx_status[i].health %></th>
+                                    <td><%= idx_status[i].status %></td>
+                                    <td><%= idx_status[i].index %></td>
+                                    <td><%= idx_status[i].pri %></td>
+                                    <td><%= idx_status[i].rep %></td>
+                                    <td><%= idx_status[i]["docs.count"] %></td>
+                                    <td><%= idx_status[i]["pri.store.size"] %></td>
+                                </tr>
+                                <% } } else { %>
+                                <!-- if is not green -->
+                                <tr>
+                                    <th id="custom"><%= idx_status[i].health %></th>
+                                    <td><%= idx_status[i].status %></td>
+                                    <td><%= idx_status[i].index %></td>
+                                    <td><%= idx_status[i].pri %></td>
+                                    <td><%= idx_status[i].rep %></td>
+                                    <td><%= idx_status[i]["docs.count"] %></td>
+                                    <td><%= idx_status[i]["pri.store.size"] %></td>
+                                </tr>
+                                <% } %>
+                            <% } %>
+                            </table>
                     </div>
                 </div>
             </div>
 
+            <div class="row">
+                <!-- HEALTH INFORMATION -->
+                <div class="col-sm-8">
+                    <div class="well">
+                        <h3><span class="fa fa-user"></span> Health Status</h3>
+                            <table id="customers">
+                                <tr>
+                                    <td>status</td>
+                                    <td>timestamp</td>
+                                    <td>cluster</td>
+                                    <td>node.total</td>
+                                    <td>node.data</td>
+                                    <td>shards</td>
+                                    <td>active_shards_percent</td>
+                                </tr>
+                            <% for(var i=0; i < health_status.length; i++) { %>
+                                <tr>
+                                    <td><%= health_status[i].status %></td>
+                                    <td><%= health_status[i].timestamp %></td>
+                                    <td><%= health_status[i].cluster %></td>
+                                    <td><%= health_status[i]["node.total"] %></td>
+                                    <td><%= health_status[i]["node.data"] %></td>
+                                    <td><%= health_status[i].shards %></td>
+                                    <td><%= health_status[i].active_shards_percent %></td>
+                                </tr>
+                            <% } %>
+                            </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- NODES INFORMATION -->
+                <div class="col-sm-8">
+                    <div class="well">
+                        <h3><span class="fa fa-user"></span> Nodes Status</h3>
+                            <table id="customers">
+                                <tr>
+                                    <td>name</td>
+                                    <td>master</td>
+                                    <td>node.role</td>
+                                    <td>cpu</td>
+                                    <td>heap.percent</td>
+                                    <td>ram.percent</td>
+                                </tr>
+                            <% for(var i=0; i < nodes_status.length; i++) { %>
+                                <tr>
+                                    <td><%= nodes_status[i].name %></td>
+                                    <td><%= nodes_status[i].master %></td>
+                                    <td><%= nodes_status[i]["node.role"] %></td>
+                                    <td><%= nodes_status[i].cpu %></td>
+                                    <td><%= nodes_status[i]["heap.percent"] %></td>
+                                    <td><%= nodes_status[i]["ram.percent"] %></td>
+                                </tr>
+                            <% } %>
+                            </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- SHARDS INFORMATION -->
+                <div class="col-sm-8">
+                    <div class="well">
+                        <h3><span class="fa fa-user"></span> Shards Status</h3>
+                            <table id="customers">
+                                <tr>
+                                    <td>node</td>
+                                    <td>index</td>
+                                    <td>shard</td>
+                                    <td>state</td>
+                                    <td>docs</td>
+                                    <td>store</td>
+                                    <td>ip</td>
+                                </tr>
+                            <% for(var i=0; i < shards_status.length; i++) { %>
+                                <tr>
+                                    <td><%= shards_status[i].node %></td>
+                                    <td><%= shards_status[i].index %></td>
+                                    <td><%= shards_status[i].shard %></td>
+                                    <td><%= shards_status[i].state %></td>
+                                    <td><%= shards_status[i].docs %></td>
+                                    <td><%= shards_status[i].store %></td>
+                                    <td><%= shards_status[i].ip %></td>
+                                </tr>
+                            <% } %>
+                            </table>
+                    </div>
+                </div>
+
+            </div>
+                        <div class="row">
+                <!-- RECOVERY INFORMATION -->
+                <div class="col-sm-12">
+                    <div class="well">
+                        <h3><span class="fa fa-user"></span> Recovery</h3>
+                            <table id="customers">
+                                <tr>
+                                    <td>index</td>
+                                    <td>shard</td>
+                                    <td>time</td>
+                                    <td>type</td>
+                                    <td>stage</td>
+                                    <td>files_percent</td>
+                                    <td>bytes_percent</td>
+                                    <td>translog_percent</td>
+                                    <td>source_host</td>
+                                    <td>target_host</td>
+                                </tr>
+                            <% for(var i=0; i < recovery.length; i++) { %>
+                                <tr>
+                                    <td><%= recovery[i].index %></td>
+                                    <td><%= recovery[i].shard %></td>
+                                    <td><%= recovery[i].time %></td>
+                                    <td><%= recovery[i].type %></td>
+                                    <td><%= recovery[i].stage %></td>
+                                    <td><%= recovery[i].files_percent %></td>
+                                    <td><%= recovery[i].bytes_percent %></td>
+                                    <td><%= recovery[i].translog_percent %></td>
+                                    <td><%= recovery[i].source_host %></td>
+                                    <td><%= recovery[i].target_host %></td>
+                                </tr>
+                            <% } %>
+                            </table>
+                    </div>
+                </div>
+            </div>
+            
         </div>
     </body>
 </html>
